@@ -64,7 +64,7 @@ main() {
     # Set variables
     ENVIRONMENT=${1:-staging}  # Default to staging if not provided
     AWS_REGION=${2:-us-east-1}  # Default to us-east-1 if not provided
-    TEMPLATE_FILE=${2:-template.yaml}  # Default to template.yaml if not provided
+    TEMPLATE_FILE=${3:-template.yaml}  # Default to template.yaml if not provided
 
     pwd
     
