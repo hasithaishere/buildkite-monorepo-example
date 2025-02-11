@@ -27,7 +27,7 @@ get_parameters() {
     PARAMETERS=$(echo "$JSON_OUTPUT" | jq -c '.Parameters')
 
     # Initialize Buildkite pipeline YAML with title
-    PIPELINE_YAML="steps:\n  - input: \":inbox_tray: Please Enter Parameter Values\"\n      fields:"
+    PIPELINE_YAML="steps:\n  - prompt: \":inbox_tray: Please Enter Parameter Values\"\n      input: \n      fields:"
 
     # Loop through parameters and generate fields based on Type
     FIELDS=$(echo "$PARAMETERS" | jq -r '
