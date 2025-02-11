@@ -2,7 +2,11 @@ steps:
   - label: "Build Frontend"
     commands:
       - "cd frontend"
+      - "--- Building Frontend ---"
       - "npm install"
       - "npm run build"
+      - "--- Uploading to S3 ---"
       - "ls -la"
       - "sam --version"
+      - "--- Invalidating CloudFront Cache ---"
+      - "aws --version"
