@@ -22,26 +22,51 @@ get_parameters() {
 
     # Convert YAML to JSON using cfn-flip
     JSON_OUTPUT=$(cfn-flip "$template_file")
+
+    # Extract Parameters as JSON
+    PARAMETERS=$(echo "$JSON_OUTPUT" | jq -c '.Parameters')
+
+    # Initialize Buildkite pipeline YAML
+    PIPELINE_YAML="steps:\n  - input:\n      fields:"
+
+    # Loop through parameters and generate fields based on Type
+    FIELDS=$(echo "$PARAMETERS" | jq -r '
+    to_entries[] | 
+    if .value | has("AllowedValues") then
+        # If AllowedValues exist, generate a dropdown
+        "        - select: \"\(.value.Description)\"\n          key: \(.key)\n          default: \(.value.Default)\n          options:\n" + 
+        ( .value.AllowedValues | map("            - label: \"\(.)\"\n              value: \"\(.)\"") | join("\n") )
+    else
+        # Otherwise, generate a text input
+        "        - text: \"\(.value.Description)\"\n          key: \(.key)\n          default: \(.value.Default)"
+    end
+    ')
+
+    # Concatenate the generated fields into the pipeline
+    PIPELINE_YAML="$PIPELINE_YAML\n$FIELDS"
+
+    # Print the final pipeline YAML
+    echo -e "$PIPELINE_YAML"
     
-    # Get all parameters and their default values using yq
-    parameters=$(echo "$JSON_OUTPUT" | jq -r '.Parameters | to_entries[] | select(.value.Type != null)')
+    # # Get all parameters and their default values using yq
+    # parameters=$(echo "$JSON_OUTPUT" | jq -r '.Parameters | to_entries[] | select(.value.Type != null)')
     
-    # Initialize parameter list
-    parameter_list=""
+    # # Initialize parameter list
+    # parameter_list=""
     
-    while IFS= read -r param; do
-        param_name=$(echo "$param" | jq -r '.key')
-        default_value=$(echo "$param" | jq -r '.value.Default // empty')
+    # while IFS= read -r param; do
+    #     param_name=$(echo "$param" | jq -r '.key')
+    #     default_value=$(echo "$param" | jq -r '.value.Default // empty')
         
-        # If parameter is Environment, use the provided environment
-        if [ "$param_name" == "Environment" ]; then
-            parameter_list+="ParameterKey=Environment,ParameterValue=$environment "
-        elif [ -n "$default_value" ]; then
-            parameter_list+="ParameterKey=$param_name,ParameterValue=$default_value "
-        fi
-    done <<< "$parameters"
+    #     # If parameter is Environment, use the provided environment
+    #     if [ "$param_name" == "Environment" ]; then
+    #         parameter_list+="ParameterKey=Environment,ParameterValue=$environment "
+    #     elif [ -n "$default_value" ]; then
+    #         parameter_list+="ParameterKey=$param_name,ParameterValue=$default_value "
+    #     fi
+    # done <<< "$parameters"
     
-    echo "$parameter_list"
+    # echo "$parameter_list"
 }
 
 # Function to check if stack exists
