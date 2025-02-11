@@ -26,8 +26,8 @@ get_parameters() {
     # Extract Parameters as JSON
     PARAMETERS=$(echo "$JSON_OUTPUT" | jq -c '.Parameters')
 
-    # Initialize Buildkite pipeline YAML with title and parameter input step
-    PIPELINE_YAML="steps:\n  - input:\n      title: \"Configure Stack Parameters\"\n      fields:"
+    # Initialize Buildkite pipeline YAML with parameter input step
+    PIPELINE_YAML="steps:\n  - block: \"Configure Stack Parameters\"\n      fields:"
 
     # Loop through parameters and generate fields based on Type
     FIELDS=$(echo "$PARAMETERS" | jq -r '
