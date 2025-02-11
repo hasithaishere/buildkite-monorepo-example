@@ -1,3 +1,67 @@
 steps:
   - label: "Triggering pipelines"
     command: "echo 'CFN - Frontend App Hosting'"
+  - label: ":gear: Select Environment & Deploy Infrastructure"
+    command: |
+      # Create environment selection menu
+      echo "Select deployment environment:"
+      select ENVIRONMENT in "staging" "production"; do
+        case $ENVIRONMENT in
+          staging|production)
+            echo "Selected environment: $ENVIRONMENT"
+            break
+            ;;
+          *) 
+            echo "Invalid selection. Please choose 1 or 2"
+            ;;
+        esac
+      done
+
+      # Create region selection menu
+      echo "Select AWS region:"
+      select REGION in "us-east-1" "us-west-2" "eu-west-1" "ap-southeast-1"; do
+        case $REGION in
+          us-east-1|us-west-2|eu-west-1|ap-southeast-1)
+            echo "Selected region: $REGION"
+            break
+            ;;
+          *) 
+            echo "Invalid selection. Please choose 1-4"
+            ;;
+        esac
+      done
+
+      # Export selections as Buildkite meta-data
+      buildkite-agent meta-data set "deployment-environment" "$ENVIRONMENT"
+      buildkite-agent meta-data set "aws-region" "$REGION"
+
+      # Print selections for confirmation
+      echo "Deploying to:"
+      echo "Environment: $ENVIRONMENT"
+      echo "Region: $REGION"
+
+      # Execute the generate-pipeline script
+      scripts/generate-pipeline.sh "$ENVIRONMENT" "$REGION"
+    plugins:
+      - command-selector#v1:
+          inputs:
+            - label: "Environment"
+              key: "environment"
+              options:
+                - label: "Staging"
+                  value: "staging"
+                - label: "Production"
+                  value: "production"
+            - label: "AWS Region"
+              key: "region"
+              options:
+                - label: "US East (N. Virginia)"
+                  value: "us-east-1"
+                - label: "US West (Oregon)"
+                  value: "us-west-2"
+                - label: "EU West (Ireland)"
+                  value: "eu-west-1"
+                - label: "Asia Pacific (Singapore)"
+                  value: "ap-southeast-1"
+    concurrency: 1
+    concurrency_group: "cloudformation-deploy"
