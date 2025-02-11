@@ -28,11 +28,13 @@ steps:
     command: |
       AWS_REGION=$(buildkite-agent meta-data get aws-region)
       ENVIRONMENT=$(buildkite-agent meta-data get environment)
+
+      echo "Generating CloudFormation pipeline for $ENVIRONMENT environment in $AWS_REGION region"
       
       # Execute generate-pipeline script with selected values
       cd infra/cloudformation/frontend-host
       ls -la
       pwd
-      ./.buildkite/scripts/generate-pipeline.sh "$ENVIRONMENT" "$REGION"
+      #./.buildkite/scripts/generate-pipeline.sh "$ENVIRONMENT" "$REGION"
     concurrency: 1
     concurrency_group: "cloudformation-$${BUILDKITE_BLOCK_ENVIRONMENT}"
