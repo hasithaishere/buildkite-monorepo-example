@@ -6,9 +6,13 @@ set -euo pipefail
 # Function to parse CloudFormation template and extract metadata
 parse_template() {
     local template_file=$1
+    
+    # Convert YAML to JSON using cfn-flip
+    JSON_OUTPUT=$(cfn-flip "$TEMPLATE_FILE")
+
     # Extract stack name suffix from metadata
-    STACK_NAME_SUFFIX=$(yq e '.Metadata.StackNameSuffix' "$template_file")
-    STACK_BASE_NAME=$(yq e '.Metadata.Name' "$template_file")
+    STACK_NAME_SUFFIX=$(echo "$JSON_OUTPUT" | jq -r '.Metadata.StackNameSuffix')
+    STACK_BASE_NAME=$(echo "$JSON_OUTPUT" | jq -r '.Metadata.Name')
 }
 
 # Function to get parameters from template and create parameter input
