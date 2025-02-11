@@ -47,6 +47,8 @@ get_parameters() {
 
     # Print the final pipeline YAML
     echo -e "$PIPELINE_YAML"
+
+    buildkite-agent pipeline upload $PIPELINE_YAML
     
     # # Get all parameters and their default values using yq
     # parameters=$(echo "$JSON_OUTPUT" | jq -r '.Parameters | to_entries[] | select(.value.Type != null)')
@@ -93,8 +95,6 @@ main() {
     ENVIRONMENT=${1:-staging}  # Default to staging if not provided
     AWS_REGION=${2:-us-east-1}  # Default to us-east-1 if not provided
     TEMPLATE_FILE=${3:-template.yaml}  # Default to template.yaml if not provided
-
-    pwd
     
     # Parse template
     parse_template "$TEMPLATE_FILE"
@@ -102,18 +102,12 @@ main() {
     # Generate stack name
     STACK_NAME="${ENVIRONMENT}${STACK_NAME_SUFFIX}"
     
-    echo "Generated Stack Name: $STACK_NAME"
-    echo "AWS Region: $AWS_REGION"
-    echo "Environment: $ENVIRONMENT"
-    
     # Get parameters
     PARAMETERS=$(get_parameters "$TEMPLATE_FILE" "$ENVIRONMENT")
-    echo "Parameters: $PARAMETERS"
-    
+
     # Create change set name with timestamp
     CHANGE_SET_NAME="changeset-${BUILDKITE_PIPELINE_SLUG}-$(date +%Y%m%d-%H%M%S)"
 
-    echo "Change Set Name: $CHANGE_SET_NAME"
     
     # # Check if stack exists and create appropriate change set
     # if check_stack_exists "$STACK_NAME" "$AWS_REGION"; then
