@@ -44,11 +44,16 @@ get_parameters() {
 
     # Concatenate the generated fields into the pipeline
     PIPELINE_YAML="$PIPELINE_YAML\n$FIELDS"
-
-    # Print the final pipeline YAML
-    echo -e "$PIPELINE_YAML"
-
-    buildkite-agent pipeline upload $PIPELINE_YAML
+    
+    # Create temporary pipeline file
+    TEMP_PIPELINE_FILE="/tmp/pipeline-${BUILDKITE_BUILD_ID}.yml"
+    echo -e "$PIPELINE_YAML" > "$TEMP_PIPELINE_FILE"
+    
+    # Upload the pipeline from temp file
+    buildkite-agent pipeline upload "$TEMP_PIPELINE_FILE"
+    
+    # Clean up temp file
+    rm -f "$TEMP_PIPELINE_FILE"
     
     # # Get all parameters and their default values using yq
     # parameters=$(echo "$JSON_OUTPUT" | jq -r '.Parameters | to_entries[] | select(.value.Type != null)')
