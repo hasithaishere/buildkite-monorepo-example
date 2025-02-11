@@ -19,9 +19,12 @@ parse_template() {
 get_parameters() {
     local template_file=$1
     local environment=$2
+
+    # Convert YAML to JSON using cfn-flip
+    JSON_OUTPUT=$(cfn-flip "$template_file")
     
     # Get all parameters and their default values using yq
-    parameters=$(jq -r '.Parameters | to_entries[] | select(.value.Type != null)' <(cfn-flip "$template_file"))
+    parameters=$(echo "$JSON_OUTPUT" | jq -r '.Parameters | to_entries[] | select(.value.Type != null)')
     
     # Initialize parameter list
     parameter_list=""
