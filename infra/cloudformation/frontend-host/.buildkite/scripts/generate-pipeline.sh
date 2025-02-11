@@ -58,9 +58,9 @@ main() {
     fi
 
     # Set variables
-    TEMPLATE_FILE="cloudformation.yaml"
     ENVIRONMENT=${1:-staging}  # Default to staging if not provided
     AWS_REGION=${2:-us-east-1}  # Default to us-east-1 if not provided
+    TEMPLATE_FILE=${2:-template.yaml}  # Default to template.yaml if not provided
     
     # Parse template
     parse_template "$TEMPLATE_FILE"
@@ -78,40 +78,42 @@ main() {
     
     # Create change set name with timestamp
     CHANGE_SET_NAME="changeset-${BUILDKITE_PIPELINE_SLUG}-$(date +%Y%m%d-%H%M%S)"
+
+    echo "Change Set Name: $CHANGE_SET_NAME"
     
-    # Check if stack exists and create appropriate change set
-    if check_stack_exists "$STACK_NAME" "$AWS_REGION"; then
-        echo "Stack exists, creating update change set..."
-        aws cloudformation create-change-set \
-            --stack-name "$STACK_NAME" \
-            --change-set-name "$CHANGE_SET_NAME" \
-            --template-body "file://$TEMPLATE_FILE" \
-            --parameters $PARAMETERS \
-            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-            --region "$AWS_REGION"
-    else
-        echo "Stack does not exist, creating creation change set..."
-        aws cloudformation create-change-set \
-            --stack-name "$STACK_NAME" \
-            --change-set-name "$CHANGE_SET_NAME" \
-            --change-set-type CREATE \
-            --template-body "file://$TEMPLATE_FILE" \
-            --parameters $PARAMETERS \
-            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-            --region "$AWS_REGION"
-    fi
+    # # Check if stack exists and create appropriate change set
+    # if check_stack_exists "$STACK_NAME" "$AWS_REGION"; then
+    #     echo "Stack exists, creating update change set..."
+    #     aws cloudformation create-change-set \
+    #         --stack-name "$STACK_NAME" \
+    #         --change-set-name "$CHANGE_SET_NAME" \
+    #         --template-body "file://$TEMPLATE_FILE" \
+    #         --parameters $PARAMETERS \
+    #         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+    #         --region "$AWS_REGION"
+    # else
+    #     echo "Stack does not exist, creating creation change set..."
+    #     aws cloudformation create-change-set \
+    #         --stack-name "$STACK_NAME" \
+    #         --change-set-name "$CHANGE_SET_NAME" \
+    #         --change-set-type CREATE \
+    #         --template-body "file://$TEMPLATE_FILE" \
+    #         --parameters $PARAMETERS \
+    #         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+    #         --region "$AWS_REGION"
+    # fi
     
-    # Wait for change set creation
-    aws cloudformation wait change-set-create-complete \
-        --stack-name "$STACK_NAME" \
-        --change-set-name "$CHANGE_SET_NAME" \
-        --region "$AWS_REGION"
+    # # Wait for change set creation
+    # aws cloudformation wait change-set-create-complete \
+    #     --stack-name "$STACK_NAME" \
+    #     --change-set-name "$CHANGE_SET_NAME" \
+    #     --region "$AWS_REGION"
     
-    # Describe change set
-    aws cloudformation describe-change-set \
-        --stack-name "$STACK_NAME" \
-        --change-set-name "$CHANGE_SET_NAME" \
-        --region "$AWS_REGION"
+    # # Describe change set
+    # aws cloudformation describe-change-set \
+    #     --stack-name "$STACK_NAME" \
+    #     --change-set-name "$CHANGE_SET_NAME" \
+    #     --region "$AWS_REGION"
 }
 
 # Execute main function with provided arguments
