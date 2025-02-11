@@ -26,8 +26,8 @@ get_parameters() {
     # Extract Parameters as JSON
     PARAMETERS=$(echo "$JSON_OUTPUT" | jq -c '.Parameters')
 
-    # Initialize Buildkite pipeline YAML
-    PIPELINE_YAML="steps:\n  - input:\n      fields:"
+    # Initialize Buildkite pipeline YAML with title and parameter input step
+    PIPELINE_YAML="steps:\n  - input:\n      title: \"Configure Stack Parameters\"\n      fields:"
 
     # Loop through parameters and generate fields based on Type
     FIELDS=$(echo "$PARAMETERS" | jq -r '
@@ -41,6 +41,40 @@ get_parameters() {
         "        - text: \"\(.value.Description)\"\n          key: \(.key)\n          default: \(.value.Default)"
     end
     ')
+
+    # Add CloudFormation changeset creation and execution steps
+    PIPELINE_YAML="$PIPELINE_YAML\n\n  - command: |\n      # Create CloudFormation changeset
+      aws cloudformation create-change-set \
+        --stack-name \"\${STACK_NAME}\" \
+        --change-set-name \"changeset-\${BUILDKITE_BUILD_NUMBER}\" \
+        --template-body file://template.yaml \
+        --parameters \$PARAMETERS \
+        --capabilities CAPABILITY_IAM
+      
+      # Wait for changeset creation
+      aws cloudformation wait change-set-create-complete \
+        --stack-name \"\${STACK_NAME}\" \
+        --change-set-name \"changeset-\${BUILDKITE_BUILD_NUMBER}\"
+      
+      # Display changeset
+      aws cloudformation describe-change-set \
+        --stack-name \"\${STACK_NAME}\" \
+        --change-set-name \"changeset-\${BUILDKITE_BUILD_NUMBER}\" \
+        --output table
+    
+  - block: \"Review Changes\"
+    prompt: \"Review the CloudFormation changes above and click 'Continue' to proceed with deployment\"
+
+  - command: |\n      # Execute CloudFormation changeset
+      aws cloudformation execute-change-set \
+        --stack-name \"\${STACK_NAME}\" \
+        --change-set-name \"changeset-\${BUILDKITE_BUILD_NUMBER}\"
+      
+      # Wait for stack update/creation to complete
+      aws cloudformation wait stack-update-complete \
+        --stack-name \"\${STACK_NAME}\" || \
+      aws cloudformation wait stack-create-complete \
+        --stack-name \"\${STACK_NAME}\""
 
     # Concatenate the generated fields into the pipeline
     PIPELINE_YAML="$PIPELINE_YAML\n$FIELDS"
