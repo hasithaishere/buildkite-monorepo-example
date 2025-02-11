@@ -27,8 +27,8 @@ get_parameters() {
     parameter_list=""
     
     while IFS= read -r param; do
-        param_name=$(echo "$param" | yq e '.key' -)
-        default_value=$(echo "$param" | yq e '.value.Default // ""' -)
+        param_name=$(echo "$param" | jq -r '.key')
+        default_value=$(echo "$param" | jq -r '.value.Default // empty')
         
         # If parameter is Environment, use the provided environment
         if [ "$param_name" == "Environment" ]; then
