@@ -2,7 +2,7 @@ steps:
   - block: ":earth_americas: Select AWS Region"
     fields:
       - select: "Environment"
-        key: "environment"
+        key: "ENVIRONMENT"
         default: "staging"
         options:
           - label: "Staging"
@@ -11,7 +11,7 @@ steps:
             value: "production"
         required: true
       - select: "AWS Region"
-        key: "aws-region"
+        key: "AWS_REGION"
         default: "us-east-1"
         options:
           - label: "US East (N. Virginia)"
@@ -27,14 +27,4 @@ steps:
   - wait
 
   - label: ":gear: Generate CloudFormation Pipeline"
-    command: |
-      AWS_REGION=$(buildkite-agent meta-data get aws-region)
-      ENVIRONMENT=$(buildkite-agent meta-data get environment)
-
-      echo "Generating CloudFormation pipeline for $ENVIRONMENT environment in $AWS_REGION region"
-      
-      # Execute generate-pipeline script with selected values
-      cd infra/cloudformation/frontend-host
-      ls -la
-      pwd
-      #./.buildkite/scripts/generate-pipeline.sh "$ENVIRONMENT" "$REGION"
+    command: "infra/cloudformation/frontend-host/.buildkite/scripts/step-gen-v2"
