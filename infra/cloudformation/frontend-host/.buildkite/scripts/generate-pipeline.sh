@@ -8,7 +8,7 @@ parse_template() {
     local template_file=$1
     
     # Convert YAML to JSON using cfn-flip
-    JSON_OUTPUT=$(cfn-flip "$TEMPLATE_FILE")
+    JSON_OUTPUT=$(cfn-flip "$template_file")
 
     # Extract stack name suffix from metadata
     STACK_NAME_SUFFIX=$(echo "$JSON_OUTPUT" | jq -r '.Metadata.StackNameSuffix')
