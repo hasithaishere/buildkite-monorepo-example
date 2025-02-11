@@ -1,6 +1,8 @@
 steps:
   - label: "Build Frontend"
     commands:
+      - "cd frontend"
       - "npm install"
       - "npm run build"
       - "ls -la"
+      - "sam --version"
