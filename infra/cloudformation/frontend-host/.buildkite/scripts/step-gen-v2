@@ -10,4 +10,4 @@ pwd
 
 cd ./infra/cloudformation/frontend-host/
 
-.buildkite/scripts/generate-pipeline.sh $AWS_REGION $ENVIRONMENT
+.buildkite/scripts/generate-pipeline.sh $ENVIRONMENT $AWS_REGION

@@ -21,7 +21,7 @@ get_parameters() {
     local environment=$2
     
     # Get all parameters and their default values using yq
-    parameters=$(yq e '.Parameters | to_entries | .[] | select(.value.Type != null)' "$template_file")
+    parameters=$(jq -r '.Parameters | to_entries[] | select(.value.Type != null)' <(cfn-flip "$template_file"))
     
     # Initialize parameter list
     parameter_list=""
