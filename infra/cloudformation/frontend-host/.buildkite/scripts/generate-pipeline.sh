@@ -48,7 +48,6 @@ get_parameters() {
         --stack-name \"\${STACK_NAME}\" \
         --change-set-name \"changeset-\${BUILDKITE_BUILD_NUMBER}\" \
         --template-body file://template.yaml \
-        --parameters \$PARAMETERS \
         --capabilities CAPABILITY_IAM
       
       # Wait for changeset creation
