@@ -13,6 +13,9 @@ Parameters:
     AllowedValues:
       - 'staging'
       - 'production'
+  Region:
+    Type: String
+    Description: 'AWS region'
 
 Resources:
   # S3 Bucket
