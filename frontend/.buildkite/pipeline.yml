@@ -1,12 +1,4 @@
 steps:
-  - label: "Build Frontend"
+  - label: "Build and Deploy Frontend"
     commands:
-      - "cd frontend"
-      - "echo \"--- Building Frontend\""
-      - "npm install"
-      - "npm run build"
-      - "echo \"--- Uploading to S3\""
-      - "ls -la"
-      - "sam --version"
-      - "echo \"--- Invalidating CloudFront Cache\""
-      - "aws --version"
+      - "./.buildkite/scripts/build-and-deploy"
