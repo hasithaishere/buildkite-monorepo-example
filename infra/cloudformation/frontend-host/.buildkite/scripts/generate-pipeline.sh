@@ -27,7 +27,7 @@ get_parameters() {
     PARAMETERS=$(echo "$JSON_OUTPUT" | jq -c '.Parameters')
 
     # Initialize Buildkite pipeline YAML
-    PIPELINE_YAML="steps:\n  - input:\n      fields:"
+    PIPELINE_YAML="steps:\n  - block: \":earth_americas: Select Environment and AWS Region\"\n  input:\n      fields:"
 
     # Loop through parameters and generate fields based on Type
     FIELDS=$(echo "$PARAMETERS" | jq -r '
@@ -48,6 +48,8 @@ get_parameters() {
     # Create temporary pipeline file
     TEMP_PIPELINE_FILE="/tmp/pipeline-${BUILDKITE_BUILD_ID}.yml"
     echo -e "$PIPELINE_YAML" > "$TEMP_PIPELINE_FILE"
+
+    cat "$TEMP_PIPELINE_FILE"
     
     # Upload the pipeline from temp file
     buildkite-agent pipeline upload "$TEMP_PIPELINE_FILE"

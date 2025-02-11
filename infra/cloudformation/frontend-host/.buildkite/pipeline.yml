@@ -1,5 +1,5 @@
 steps:
-  - block: ":earth_americas: Select AWS Region"
+  - block: ":earth_americas: Select Environment and AWS Region"
     fields:
       - select: "Environment"
         key: "ENVIRONMENT"
