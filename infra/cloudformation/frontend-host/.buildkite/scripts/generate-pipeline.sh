@@ -65,12 +65,14 @@ main() {
     ENVIRONMENT=${1:-staging}  # Default to staging if not provided
     AWS_REGION=${2:-us-east-1}  # Default to us-east-1 if not provided
     TEMPLATE_FILE=${2:-template.yaml}  # Default to template.yaml if not provided
+
+    pwd
     
     # Parse template
     parse_template "$TEMPLATE_FILE"
     
     # Generate stack name
-    STACK_NAME="${STACK_BASE_NAME}-${ENVIRONMENT}${STACK_NAME_SUFFIX}"
+    STACK_NAME="${ENVIRONMENT}${STACK_NAME_SUFFIX}"
     
     echo "Generated Stack Name: $STACK_NAME"
     echo "AWS Region: $AWS_REGION"

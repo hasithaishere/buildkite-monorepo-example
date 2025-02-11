@@ -8,4 +8,6 @@ echo "Deploying frontend to $ENVIRONMENT in $AWS_REGION"
 
 pwd
 
-./infra/cloudformation/frontend-host/.buildkite/scripts/generate-pipeline.sh $AWS_REGION $ENVIRONMENT
+cd ./infra/cloudformation/frontend-host/
+
+.buildkite/scripts/generate-pipeline.sh $AWS_REGION $ENVIRONMENT
