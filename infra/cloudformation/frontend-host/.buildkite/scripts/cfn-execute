@@ -51,7 +51,7 @@ echo "Stack Name: $STACK_NAME"
 
 # Check if stack exists
 if check_stack_exists "$STACK_NAME" "$AWS_REGION"; then
-    echo "Stack exists, updating..."
+    echo "--- Stack exists, updating..."
     
     aws cloudformation update-stack \
         --stack-name "$STACK_NAME" \
@@ -71,7 +71,7 @@ if check_stack_exists "$STACK_NAME" "$AWS_REGION"; then
     
     wait_for_stack "$STACK_NAME" "$AWS_REGION" "update"
 else
-    echo "Stack does not exist, creating..."
+    echo "--- Stack does not exist, creating..."
     
     aws cloudformation create-stack \
         --stack-name "$STACK_NAME" \
@@ -84,7 +84,7 @@ else
 fi
 
 # Get and display stack outputs
-echo "Stack outputs:"
+echo "--- Stack outputs:"
 aws cloudformation describe-stacks \
     --stack-name "$STACK_NAME" \
     --region "$AWS_REGION" \
