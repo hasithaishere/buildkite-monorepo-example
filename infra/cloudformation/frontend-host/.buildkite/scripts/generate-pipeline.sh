@@ -109,6 +109,8 @@ main() {
     # Generate stack name
     STACK_NAME="${ENVIRONMENT}${STACK_NAME_SUFFIX}"
 
+    pwd
+
     .buildkite/scripts/cfn-execute "$AWS_REGION" "$ENVIRONMENT" "$STACK_NAME"
     
     # # Get parameters
