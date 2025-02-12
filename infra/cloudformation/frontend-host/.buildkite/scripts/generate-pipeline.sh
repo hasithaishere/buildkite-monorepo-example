@@ -16,67 +16,67 @@ parse_template() {
 }
 
 # Function to get parameters from template and create parameter input
-get_parameters() {
-    local template_file=$1
-    local environment=$2
+# get_parameters() {
+#     local template_file=$1
+#     local environment=$2
 
-    # Convert YAML to JSON using cfn-flip
-    JSON_OUTPUT=$(cfn-flip "$template_file")
+#     # Convert YAML to JSON using cfn-flip
+#     JSON_OUTPUT=$(cfn-flip "$template_file")
 
-    # Extract Parameters as JSON
-    PARAMETERS=$(echo "$JSON_OUTPUT" | jq -c '.Parameters')
+#     # Extract Parameters as JSON
+#     PARAMETERS=$(echo "$JSON_OUTPUT" | jq -c '.Parameters')
 
-    # Initialize Buildkite pipeline YAML with title
-    PIPELINE_YAML="steps:\n  - input:\n      fields:"
+#     # Initialize Buildkite pipeline YAML with title
+#     PIPELINE_YAML="steps:\n  - input:\n      fields:"
 
-    # Loop through parameters and generate fields based on Type
-    FIELDS=$(echo "$PARAMETERS" | jq -r '
-    to_entries[] | 
-    if .value | has("AllowedValues") then
-        # If AllowedValues exist, generate a dropdown
-        "        - select: \"\(.value.Description)\"\n          key: \(.key)\n          default: \(.value.Default)\n          options:\n" + 
-        ( .value.AllowedValues | map("            - label: \"\(.)\"\n              value: \"\(.)\"") | join("\n") )
-    else
-        # Otherwise, generate a text input
-        "        - text: \"\(.value.Description)\"\n          key: \(.key)\n          default: \(.value.Default)"
-    end
-    ')
+#     # Loop through parameters and generate fields based on Type
+#     FIELDS=$(echo "$PARAMETERS" | jq -r '
+#     to_entries[] | 
+#     if .value | has("AllowedValues") then
+#         # If AllowedValues exist, generate a dropdown
+#         "        - select: \"\(.value.Description)\"\n          key: \(.key)\n          default: \(.value.Default)\n          options:\n" + 
+#         ( .value.AllowedValues | map("            - label: \"\(.)\"\n              value: \"\(.)\"") | join("\n") )
+#     else
+#         # Otherwise, generate a text input
+#         "        - text: \"\(.value.Description)\"\n          key: \(.key)\n          default: \(.value.Default)"
+#     end
+#     ')
 
-    # Concatenate the generated fields into the pipeline
-    PIPELINE_YAML="$PIPELINE_YAML\n$FIELDS"
+#     # Concatenate the generated fields into the pipeline
+#     PIPELINE_YAML="$PIPELINE_YAML\n$FIELDS"
     
-    # Create temporary pipeline file
-    TEMP_PIPELINE_FILE="/tmp/pipeline-${BUILDKITE_BUILD_ID}.yml"
-    echo -e "$PIPELINE_YAML" > "$TEMP_PIPELINE_FILE"
+#     # Create temporary pipeline file
+#     TEMP_PIPELINE_FILE="/tmp/pipeline-${BUILDKITE_BUILD_ID}.yml"
+#     echo -e "$PIPELINE_YAML" > "$TEMP_PIPELINE_FILE"
 
-    cat "$TEMP_PIPELINE_FILE"
+#     cat "$TEMP_PIPELINE_FILE"
     
-    # Upload the pipeline from temp file
-    buildkite-agent pipeline upload "$TEMP_PIPELINE_FILE"
+#     # Upload the pipeline from temp file
+#     buildkite-agent pipeline upload "$TEMP_PIPELINE_FILE"
     
-    # Clean up temp file
-    rm -f "$TEMP_PIPELINE_FILE"
+#     # Clean up temp file
+#     rm -f "$TEMP_PIPELINE_FILE"
     
-    # # Get all parameters and their default values using yq
-    # parameters=$(echo "$JSON_OUTPUT" | jq -r '.Parameters | to_entries[] | select(.value.Type != null)')
+#     # # Get all parameters and their default values using yq
+#     # parameters=$(echo "$JSON_OUTPUT" | jq -r '.Parameters | to_entries[] | select(.value.Type != null)')
     
-    # # Initialize parameter list
-    # parameter_list=""
+#     # # Initialize parameter list
+#     # parameter_list=""
     
-    # while IFS= read -r param; do
-    #     param_name=$(echo "$param" | jq -r '.key')
-    #     default_value=$(echo "$param" | jq -r '.value.Default // empty')
+#     # while IFS= read -r param; do
+#     #     param_name=$(echo "$param" | jq -r '.key')
+#     #     default_value=$(echo "$param" | jq -r '.value.Default // empty')
         
-    #     # If parameter is Environment, use the provided environment
-    #     if [ "$param_name" == "Environment" ]; then
-    #         parameter_list+="ParameterKey=Environment,ParameterValue=$environment "
-    #     elif [ -n "$default_value" ]; then
-    #         parameter_list+="ParameterKey=$param_name,ParameterValue=$default_value "
-    #     fi
-    # done <<< "$parameters"
+#     #     # If parameter is Environment, use the provided environment
+#     #     if [ "$param_name" == "Environment" ]; then
+#     #         parameter_list+="ParameterKey=Environment,ParameterValue=$environment "
+#     #     elif [ -n "$default_value" ]; then
+#     #         parameter_list+="ParameterKey=$param_name,ParameterValue=$default_value "
+#     #     fi
+#     # done <<< "$parameters"
     
-    # echo "$parameter_list"
-}
+#     # echo "$parameter_list"
+# }
 
 # Function to check if stack exists
 check_stack_exists() {
@@ -108,12 +108,14 @@ main() {
     
     # Generate stack name
     STACK_NAME="${ENVIRONMENT}${STACK_NAME_SUFFIX}"
-    
-    # Get parameters
-    PARAMETERS=$(get_parameters "$TEMPLATE_FILE" "$ENVIRONMENT")
 
-    # Create change set name with timestamp
-    CHANGE_SET_NAME="changeset-${BUILDKITE_PIPELINE_SLUG}-$(date +%Y%m%d-%H%M%S)"
+    .buildkite/scripts/cfn-execute "$AWS_REGION" "$ENVIRONMENT" "$STACK_NAME"
+    
+    # # Get parameters
+    # PARAMETERS=$(get_parameters "$TEMPLATE_FILE" "$ENVIRONMENT")
+
+    # # Create change set name with timestamp
+    # CHANGE_SET_NAME="changeset-${BUILDKITE_PIPELINE_SLUG}-$(date +%Y%m%d-%H%M%S)"
 
     
     # # Check if stack exists and create appropriate change set
