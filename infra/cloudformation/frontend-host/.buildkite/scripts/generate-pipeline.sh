@@ -111,7 +111,9 @@ main() {
 
     pwd
 
-    .buildkite/scripts/cfn-execute "$AWS_REGION" "$ENVIRONMENT" "$STACK_NAME"
+    cat ./.buildkite/scripts/cfn-execute
+
+    ./.buildkite/scripts/cfn-execute "$AWS_REGION" "$ENVIRONMENT" "$STACK_NAME"
     
     # # Get parameters
     # PARAMETERS=$(get_parameters "$TEMPLATE_FILE" "$ENVIRONMENT")
